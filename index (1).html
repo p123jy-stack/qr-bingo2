@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QR 빙고 글자판</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap">
+<style>
+/* 한 칸의 QR을 찍으면 그 칸의 글자(와 순서 번호)만 크게 보여 주는 화면 */
+:root{--bg:#f3f5f4;--fg:#1d2b2a;--muted:#6b7a78;--ring:#0b6b63;--card:#ffffff;--line:#d5dddb;--fail:#8a96a3;
+--font:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121917;--fg:#e8f0ee;--muted:#93a39f;--ring:#58c9bd;--card:#1b2523;--line:#2d3a37;--fail:#7d8a97;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121917;--fg:#e8f0ee;--muted:#93a39f;--ring:#58c9bd;--card:#1b2523;--line:#2d3a37;--fail:#7d8a97;color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);padding-block:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;justify-content:center}
+main{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:20px;padding-block:24px}
+.tag{font-size:13px;letter-spacing:.08em;color:var(--muted)}
+.card{width:100%;aspect-ratio:1/1;max-height:70vh;background:var(--card);border:2px solid var(--line);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.num{font-size:clamp(40px,14vw,64px);font-weight:900;color:var(--ring);line-height:1}
+.ch{font-size:clamp(120px,48vw,210px);font-weight:900;line-height:1.05;word-break:keep-all}
+.ch.long{font-size:clamp(28px,8vw,40px);font-weight:700;text-align:center;padding:0 12px}
+.ch.fail{color:var(--fail)}
+.hint{font-size:14px;color:var(--muted);text-align:center;line-height:1.6}
+</style>
+</head><body>
+<main>
+<div class="tag" id="tag">QR 빙고</div>
+<div class="card" role="status" aria-live="polite"><div class="num" id="num" hidden></div><div class="ch" id="ch">QR</div></div>
+<p class="hint" id="hint">빙고판의 QR 코드를 카메라로 찍으면 그 칸의 글자가 여기에 나타납니다.</p>
+</main>
+<script>
+var M={"r-a1": "④ 터", "r-b1": "꽝", "r-c1": "꽃", "r-d1": "③ 부", "r-a2": "발", "r-b2": "⑦ 시", "r-c2": "② 금", "r-d2": "별", "r-a3": "책", "r-b3": "⑧ 간", "r-c3": "① 지", "r-d3": "쉼", "r-a4": "⑤ 자", "r-b4": "눈", "r-c4": "봄", "r-d4": "⑥ 습", "s-a1": "① 조", "s-b1": "⑥ 서", "s-c1": "② 용", "s-d1": "③ 히", "s-a2": "꽝", "s-b2": "제", "s-c2": "밥", "s-d2": "책", "s-a3": "④ 앉", "s-b3": "⑧ 기", "s-c3": "⑦ 쉬", "s-d3": "⑤ 아", "s-a4": "빵", "s-b4": "펜", "s-c4": "달", "s-d4": "산", "t-a1": "⑦ 간", "t-b1": "꽝", "t-c1": "② 도", "t-d1": "숙", "t-a2": "⑧ 에", "t-b2": "산", "t-c2": "③ 는", "t-d2": "제", "t-a3": "⑤ 음", "t-b3": "문", "t-c3": "④ 다", "t-d3": "별", "t-a4": "⑥ 시", "t-b4": "공", "t-c4": "① 진", "t-d4": "물", "u-a1": "꽝", "u-b1": "꽃", "u-c1": "펜", "u-d1": "봄", "u-a2": "④ 자", "u-b2": "② 숙", "u-c2": "⑤ 습", "u-d2": "⑧ !", "u-a3": "물", "u-b3": "쉼", "u-c3": "휴", "u-d3": "손", "u-a4": "⑦ 간", "u-b4": "① 정", "u-c4": "③ 한", "u-d4": "⑥ 시", "v-a1": "꽝", "v-b1": "① 자", "v-c1": "쉼", "v-d1": "⑦ 시", "v-a2": "책", "v-b2": "③ 주", "v-c2": "길", "v-d2": "⑤ 학", "v-a3": "손", "v-b3": "② 기", "v-c3": "문", "v-d3": "⑥ 습", "v-a4": "꿈", "v-b4": "④ 도", "v-c4": "힘", "v-d4": "⑧ 간", "w-a1": "④ 여", "w-b1": "⑦ 지", "w-c1": "⑧ !", "w-d1": "⑥ 까", "w-a2": "꽝", "w-b2": "물", "w-c2": "휴", "w-d2": "꽃", "w-a3": "책", "w-b3": "빵", "w-c3": "힘", "w-d3": "손", "w-a4": "⑤ 기", "w-b4": "③ 은", "w-c4": "① 오", "w-d4": "② 늘"};
+var CIRC="①②③④⑤⑥⑦⑧";
+function show(){
+  var k=decodeURIComponent((location.hash||"").slice(1)).toLowerCase();
+  var t=M[k];var num=document.getElementById("num"),ch=document.getElementById("ch"),tag=document.getElementById("tag"),hint=document.getElementById("hint");
+  ch.className="ch";num.hidden=true;
+  if(!t){tag.textContent="QR 빙고";ch.textContent="QR";hint.textContent="빙고판의 QR 코드를 카메라로 찍으면 그 칸의 글자가 여기에 나타납니다.";return;}
+  var parts=k.split("-");tag.textContent=parts[0].toUpperCase()+"형 · "+({a:"ㄱ",b:"ㄴ",c:"ㄷ",d:"ㄹ"})[parts[1][0]]+parts[1][1]+" 칸";
+  var m=t.match(/^([①-⑧]) (.+)$/);
+  if(m){num.textContent=m[1];num.hidden=false;ch.textContent=m[2];hint.textContent="번호가 붙은 글자예요. 답안 작성지에 번호와 함께 적어요.";}
+  else if(t==="꽝"){ch.textContent="꽝";ch.className="ch fail";hint.textContent="이 칸에는 글자가 없어요. 답안 작성지에 꽝이라고 적어요.";}
+  else{ch.textContent=t;hint.textContent="번호가 없는 글자예요. 글자만 답안 작성지에 적어요.";}
+}
+window.addEventListener("hashchange",show);show();
+</script>
+
+</body></html>
