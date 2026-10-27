@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QR 빙고 글자판</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap">
+<style>
+/* 한 칸의 QR을 찍으면 그 칸의 글자(와 순서 번호)만 크게 보여 주는 화면 */
+:root{--bg:#f3f5f4;--fg:#1d2b2a;--muted:#6b7a78;--ring:#0b6b63;--card:#ffffff;--line:#d5dddb;--fail:#8a96a3;
+--font:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121917;--fg:#e8f0ee;--muted:#93a39f;--ring:#58c9bd;--card:#1b2523;--line:#2d3a37;--fail:#7d8a97;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121917;--fg:#e8f0ee;--muted:#93a39f;--ring:#58c9bd;--card:#1b2523;--line:#2d3a37;--fail:#7d8a97;color-scheme:dark}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);padding-block:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;justify-content:center}
+main{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:20px;padding-block:24px}
+.tag{font-size:13px;letter-spacing:.08em;color:var(--muted)}
+.card{width:100%;aspect-ratio:1/1;max-height:70vh;background:var(--card);border:2px solid var(--line);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.num{font-size:clamp(40px,14vw,64px);font-weight:900;color:var(--ring);line-height:1}
+.ch{font-size:clamp(120px,48vw,210px);font-weight:900;line-height:1.05;word-break:keep-all}
+.ch.long{font-size:clamp(28px,8vw,40px);font-weight:700;text-align:center;padding:0 12px}
+.ch.fail{color:var(--fail)}
+.hint{font-size:14px;color:var(--muted);text-align:center;line-height:1.6}
+</style>
+</head><body>
+<main>
+<div class="tag" id="tag">QR 빙고</div>
+<div class="card" role="status" aria-live="polite"><div class="num" id="num" hidden></div><div class="ch" id="ch">QR</div></div>
+<p class="hint" id="hint">빙고판의 QR 코드를 카메라로 찍으면 그 칸의 글자가 여기에 나타납니다.</p>
+<p class="hint" style="font-size:11px;opacity:.7">판 버전 10/27-4</p>
+</main>
+<script>
+function show(){
+  var t="";
+  var q=location.search||"";var mm=q.match(/[?&]t=([^&#]*)/);
+  var raw=mm?mm[1]:(location.hash||"");if(!mm&&raw.charAt(0)==="#")raw=raw.slice(1);
+  try{t=decodeURIComponent(raw.replace(/\+/g,"%20"));}catch(e){t=raw;}
+  var num=document.getElementById("num"),ch=document.getElementById("ch"),tag=document.getElementById("tag"),hint=document.getElementById("hint");
+  ch.className="ch";num.hidden=true;tag.textContent="QR 빙고";
+  if(!t){ch.textContent="QR";hint.textContent="빙고판의 QR 코드를 카메라로 찍으면 그 칸의 글자가 여기에 나타납니다.";return;}
+  var m=t.match(/^([①-⑧])\s*(.+)$/);
+  if(m){num.textContent=m[1];num.hidden=false;ch.textContent=m[2];hint.textContent="번호가 붙은 글자예요. 답안 작성지에 번호와 함께 적어요.";}
+  else if(t==="꽝"){ch.textContent="꽝";ch.className="ch fail";hint.textContent="이 칸에는 글자가 없어요. 답안 작성지에 꽝이라고 적어요.";}
+  else{ch.textContent=t;hint.textContent="번호가 없는 글자예요. 글자만 답안 작성지에 적어요.";}
+}
+window.addEventListener("hashchange",show);show();
+</script>
+
+</body></html>
